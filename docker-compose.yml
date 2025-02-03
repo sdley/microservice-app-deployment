@@ -1,0 +1,42 @@
+services:
+  # Service React (Front-end)
+  frontend:
+    image: dialloley/frontend_car:latest # Remplacez avec votre image Docker pour le front-end
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000" # Mappe le port 3000 du conteneur au port 3000 de l'hôte
+    depends_on:
+      - backend # Attend que le back-end soit prêt
+
+  # Service Spring Boot (Back-end)
+  backend:
+    image: dialloley/backend_car:latest # Remplacez avec votre image Docker pour le back-end
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080" # Mappe le port 8080 du conteneur au port 8080 de l'hôte
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/cardb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - car-net
+    depends_on:
+      - db # Attend que la base de données soit prête
+
+  # Service MariaDB (Base de données)
+  db:
+    image: dialloley/db_car:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cardb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    networks:
+      - car-net
+
+# Définition des réseaux
+networks:
+  car-net:
